@@ -2,6 +2,12 @@
 
 ![lazy_loading](./lazy_loading.gif)
 
-This is a demo that implemente lazy loading table view by Operation, inspired by [LazyTableImages](https://developer.apple.com/library/archive/samplecode/LazyTableImages/Introduction/Intro.html#//apple_ref/doc/uid/DTS40009394-Intro-DontLinkElementID_2) and [operationqueue-tutorial](https://www.raywenderlich.com/5293-operation-and-operationqueue-tutorial-in-swift) 
+Demo about table view image lazy loading implemented by Operations, inspired by [LazyTableImages](https://developer.apple.com/library/archive/samplecode/LazyTableImages/Introduction/Intro.html#//apple_ref/doc/uid/DTS40009394-Intro-DontLinkElementID_2) and [operationqueue-tutorial](https://www.raywenderlich.com/5293-operation-and-operationqueue-tutorial-in-swift) 
 
-Operation is a high level API based on GCD that has some advance features like cancel, suspend, and resume.
+# Operations
+## Operation
+[Operation](https://developer.apple.com/documentation/foundation/operation) is a high level API based on GCD that has some advance features like cancel, suspend, and resume.
+Operation only can perform once and cannot be execute again.
+We usually put operations into operationqueu but you can manually trigger operation by calling its `start()` method and you will take care the readiness state.
+## OperationQueue
+An [OperationQueue](https://developer.apple.com/documentation/foundation/operationqueue) executes its queued operations.
