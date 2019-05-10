@@ -133,10 +133,10 @@ class ListViewController: UITableViewController {
     
     func loadImagesForOnScreenCells() {
         if let pathArray = tableView.indexPathsForVisibleRows {
-            guard var allPendingOperations = Set(pendingOperations.downloadsInProgress.keys) as? Set<IndexPath> else {
+            guard let allPendingOperations = Set(pendingOperations.downloadsInProgress.keys) as? Set<IndexPath> else {
                 return
             }
-            allPendingOperations.formUnion(allPendingOperations)
+//            allPendingOperations.formUnion(allPendingOperations)
             
             var toBeCancelled = allPendingOperations
             let visiblePaths = Set(pathArray)
