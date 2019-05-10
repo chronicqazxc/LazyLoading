@@ -66,7 +66,8 @@ class AppIconDownloader: Operation {
 
 class PendingIconDownloaderOperations {
     fileprivate var appIconDownloaders = [AppIconDownloader]()
-    lazy var downloadsInProgress = [IndexPath: Operation]()
+    typealias Key = AnyHashable
+    lazy var downloadsInProgress = [Key: Operation]()
     fileprivate lazy var downloadQueue: OperationQueue = {
         var queue = OperationQueue()
         queue.name = "Image Filtration queue"
@@ -88,13 +89,13 @@ class PendingIconDownloaderOperations {
     }
     
     func startDownload(for appIconDownloader: AppIconDownloader,
-                       at indexPath: IndexPath,
+                       at key: Key,
                        completeHandler: @escaping (OperationStatus)->Void) {
         guard appIconDownloader.iconDownloadStatus == .new else {
             return
         }
         
-        guard downloadsInProgress[indexPath] == nil else {
+        guard downloadsInProgress[key] == nil else {
             return
         }
         appIconDownloader.completionBlock = { [weak self] in
@@ -108,12 +109,21 @@ class PendingIconDownloaderOperations {
                 if appIconDownloader.isFinished {
                     assert(appIconDownloader.image != nil, "image should not be nil")
                 }
-                strongSelf.downloadsInProgress.removeValue(forKey: indexPath)
+                strongSelf.downloadsInProgress.removeValue(forKey: key)
                 completeHandler(.finished)
             }
         }
         if !downloadQueue.operations.contains(appIconDownloader) {
             downloadQueue.addOperation(appIconDownloader)
+        }
+    }
+    
+    func cancel(at keys: [Key]) {
+        for key in keys {
+            if let pendingDownload = downloadsInProgress[key] {
+                pendingDownload.cancel()
+            }
+            downloadsInProgress.removeValue(forKey: key)
         }
     }
     

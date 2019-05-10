@@ -133,8 +133,10 @@ class ListViewController: UITableViewController {
     
     func loadImagesForOnScreenCells() {
         if let pathArray = tableView.indexPathsForVisibleRows {
-            var allPendingOperations = Set(pendingOperations.downloadsInProgress.keys)
-            allPendingOperations.formUnion(pendingOperations.downloadsInProgress.keys)
+            guard var allPendingOperations = Set(pendingOperations.downloadsInProgress.keys) as? Set<IndexPath> else {
+                return
+            }
+            allPendingOperations.formUnion(allPendingOperations)
             
             var toBeCancelled = allPendingOperations
             let visiblePaths = Set(pathArray)
@@ -142,14 +144,9 @@ class ListViewController: UITableViewController {
             
             var toBeStart = visiblePaths
             toBeStart.subtract(allPendingOperations)
-            
-            for indexPath in toBeCancelled {
-                if let pendingDownload = pendingOperations.downloadsInProgress[indexPath] {
-                    pendingDownload.cancel()
-                }
-                pendingOperations.downloadsInProgress.removeValue(forKey: indexPath)
-            }
-            
+
+            pendingOperations.cancel(at: Array(toBeCancelled))
+
             for indexPath in toBeStart {
                 let appIconDownloader = pendingOperations[indexPath.row]
                 startOperations(for: appIconDownloader, at: indexPath)
