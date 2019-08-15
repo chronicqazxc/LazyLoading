@@ -1,4 +1,5 @@
 # LazyLoading
+![](https://img.shields.io/badge/Swift-v4.2-blue)
 
 ![lazy_loading](./lazy_loading.gif)
 
@@ -11,3 +12,5 @@ Operation only can perform once and cannot be execute again.
 We usually put operations into operationqueu but you can manually trigger operation by calling its `start()` method and you will take care the readiness state.
 ## OperationQueue
 An [OperationQueue](https://developer.apple.com/documentation/foundation/operationqueue) executes its queued operations.
+
+Author: [Wayne Hsiao](mailto:chronicqazxc@gmail.com)
