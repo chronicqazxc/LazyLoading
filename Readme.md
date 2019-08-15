@@ -7,7 +7,7 @@ Demo about table view image lazy loading implemented by Operations, inspired by 
 
 # Operations
 ## Operation
-[Operation](https://developer.apple.com/documentation/foundation/operation) is a high level API based on GCD that has some advance features like cancel, suspend, and resume.
+[Operation](https://developer.apple.com/documentation/foundation/operation) is a high level API based on GCD that has some advance features like **cancel**, **suspend**, and **resume**.
 Operation only can perform once and cannot be execute again.
 We usually put operations into operationqueu but you can manually trigger operation by calling its `start()` method and you will take care the readiness state.
 ## OperationQueue
