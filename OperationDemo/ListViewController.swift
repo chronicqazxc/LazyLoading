@@ -10,16 +10,8 @@ import UIKit
 
 class ListViewController: UITableViewController {
     var pendingOperations = PendingIconDownloaderOperations()
-    var appContainer: AppContainer? {
-        didSet {
-            let apps = appContainer?.apps.map {
-                AppIconDownloader($0)
-            }
-            pendingOperations = PendingIconDownloaderOperations(downloaders: apps ?? [AppIconDownloader]())
-        }
-    }
-
-    let dataSourceURL = URL(string: "http://phobos.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/toppaidapplications/limit=75/json")
+    /// https://rss.itunes.apple.com/en-us
+    let dataSourceURL = URL(string: "https://rss.itunes.apple.com/api/v1/us/ios-apps/top-paid/all/100/explicit.json")
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -41,7 +33,11 @@ class ListViewController: UITableViewController {
             if let data = data {
                 do {
                     if let dic = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
-                        self.appContainer = AppContainer.initWith(dic)
+                        let appContainer = AppContainer.initWith(dic)
+                        let apps = appContainer?.apps.map {
+                            AppIconDownloader($0)
+                        }
+                        self.pendingOperations = PendingIconDownloaderOperations(downloaders: apps ?? [AppIconDownloader]())
                     }
                     DispatchQueue.main.async {
                         UIApplication.shared.isNetworkActivityIndicatorVisible = false
@@ -132,24 +128,12 @@ class ListViewController: UITableViewController {
     }
     
     func loadImagesForOnScreenCells() {
-        if let pathArray = tableView.indexPathsForVisibleRows {
-            guard let allPendingOperations = Set(pendingOperations.downloadsInProgress.keys) as? Set<IndexPath> else {
-                return
-            }
-//            allPendingOperations.formUnion(allPendingOperations)
-            
-            var toBeCancelled = allPendingOperations
-            let visiblePaths = Set(pathArray)
-            toBeCancelled.subtract(visiblePaths)
-            
-            var toBeStart = visiblePaths
-            toBeStart.subtract(allPendingOperations)
-
-            pendingOperations.cancel(at: Array(toBeCancelled))
-
-            for indexPath in toBeStart {
-                let appIconDownloader = pendingOperations[indexPath.row]
-                startOperations(for: appIconDownloader, at: indexPath)
+        if let pathes = tableView.indexPathsForVisibleRows {
+            pendingOperations.loadImagesForOnScreenCells(indexPathsForVisibleRows: pathes) { [weak self] in
+                guard let strongSelf = self else {
+                    return
+                }
+                strongSelf.tableView.reloadRows(at: $0, with: .fade)
             }
         }
     }

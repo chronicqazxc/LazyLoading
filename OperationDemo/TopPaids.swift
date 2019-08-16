@@ -18,19 +18,15 @@ struct AppContainer {
     let apps: [App]
     static func initWith(_ dic: [String: Any]) -> AppContainer? {
         guard let feed = dic["feed"] as? [String: Any],
-            let entry = feed["entry"] as? [[String: Any]] else {
+            let entry = feed["results"] as? [[String: Any]] else {
             return nil
         }
         let apps = entry.map { (entry) -> App in
-            guard let images = entry["im:image"] as? [[String: Any]],
-                let titleDic = entry["title"] as? [String: Any],
-                let linkDic = entry["link"] as? [String: Any],
-                let attributeDic = linkDic["attributes"] as? [String: Any] else {
+            guard let imageURL = entry["artworkUrl100"] as? String,
+                let title = entry["name"] as? String,
+                let link = entry["url"] as? String else {
                 return App(image: "", title: "", link: "")
             }
-            let imageURL = images.first?["label"] as? String ?? ""
-            let title = titleDic["label"] as? String ?? ""
-            let link = attributeDic["href"] as? String ?? ""
             return App(image: imageURL, title: title, link: link)
         }
         let container = AppContainer(apps: apps)
