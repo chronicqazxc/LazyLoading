@@ -1,7 +1,11 @@
 # LazyLoading
 ![](https://img.shields.io/badge/Swift-v4.2-blue)
 
+## Screenshot
 ![lazy_loading](./lazy_loading.gif)
+
+## HighLevel architecture
+![lazy_loading](./LazyLoading.png)
 
 Demo about table view image lazy loading implemented by Operations, inspired by [LazyTableImages](https://developer.apple.com/library/archive/samplecode/LazyTableImages/Introduction/Intro.html#//apple_ref/doc/uid/DTS40009394-Intro-DontLinkElementID_2) and [operationqueue-tutorial](https://www.raywenderlich.com/5293-operation-and-operationqueue-tutorial-in-swift) 
 

@@ -65,9 +65,11 @@ class AppIconDownloader: Operation {
 }
 
 class PendingIconDownloaderOperations {
+    /// Data Source
     fileprivate var appIconDownloaders = [AppIconDownloader]()
     typealias Key = AnyHashable
-    lazy var downloadsInProgress = [Key: Operation]()
+    /// Control respective AppIconDownloaders
+    fileprivate var downloadsInProgress = [Key: AppIconDownloader]()
     fileprivate lazy var downloadQueue: OperationQueue = {
         var queue = OperationQueue()
         queue.name = "Image Filtration queue"
@@ -81,6 +83,11 @@ class PendingIconDownloaderOperations {
     
     subscript (index: Int) -> AppIconDownloader {
         get {
+            let downloader = appIconDownloaders[index]
+            if downloader.isCancelled == true {
+                let newDownloader = AppIconDownloader(downloader.app)
+                appIconDownloaders[index] = newDownloader
+            }
             return appIconDownloaders[index]
         }
         set {
@@ -106,7 +113,7 @@ class PendingIconDownloaderOperations {
                 completeHandler(.cancel)
             }
             DispatchQueue.main.async {
-                if appIconDownloader.isFinished {
+                if appIconDownloader.isFinished && !appIconDownloader.isCancelled {
                     assert(appIconDownloader.image != nil, "image should not be nil")
                 }
                 strongSelf.downloadsInProgress.removeValue(forKey: key)
@@ -116,14 +123,15 @@ class PendingIconDownloaderOperations {
         if !downloadQueue.operations.contains(appIconDownloader) {
             downloadQueue.addOperation(appIconDownloader)
         }
+        downloadsInProgress[key] = appIconDownloader
     }
     
     func cancel(at keys: [Key]) {
         for key in keys {
             if let pendingDownload = downloadsInProgress[key] {
                 pendingDownload.cancel()
+                downloadsInProgress.removeValue(forKey: key)
             }
-            downloadsInProgress.removeValue(forKey: key)
         }
     }
     
@@ -133,6 +141,35 @@ class PendingIconDownloaderOperations {
     
     func resumeAllOperations() {
         downloadQueue.isSuspended = false
+    }
+
+    func loadImagesForOnScreenCells(indexPathsForVisibleRows pathes: [IndexPath],
+                                    completeHander: @escaping ([IndexPath])->Void) {
+
+        guard let allPendingOperations = Set(downloadsInProgress.keys) as? Set<IndexPath> else {
+            return
+        }
+        //            allPendingOperations.formUnion(allPendingOperations)
+
+        var toBeCancelled = allPendingOperations
+        let visiblePaths = Set(pathes)
+        toBeCancelled.subtract(visiblePaths)
+
+        var toBeStart = visiblePaths
+        toBeStart.subtract(allPendingOperations)
+
+        cancel(at: Array(toBeCancelled))
+
+        for indexPath in toBeStart {
+            let appIconDownloader = self[indexPath.row]
+            startDownload(for: appIconDownloader, at: indexPath) {
+                if $0 == .finished {
+                    DispatchQueue.main.async {
+                        completeHander([indexPath])
+                    }
+                }
+            }
+        }
     }
 }
 
